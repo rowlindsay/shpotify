@@ -60,34 +60,35 @@ showHelp () {
     echo;
     echo "Commands:";
     echo;
-    echo "  play                         # Resumes playback where Spotify last left off.";
-    echo "  play <song name>             # Finds a song by name and plays it.";
-    echo "  play album <album name>      # Finds an album by name and plays it.";
-    echo "  play artist <artist name>    # Finds an artist by name and plays it.";
-    echo "  play list <playlist name>    # Finds a playlist by name and plays it.";
-    echo "  play uri <uri>               # Play songs from specific uri.";
+    echo "  play                                    # Resumes playback where Spotify last left off.";
+    echo "  play <song name>                        # Finds a song by name and plays it.";
+    echo "  play album <album name>                 # Finds an album by name and plays it.";
+    echo "  play artist <artist name>               # Finds an artist by name and plays it.";
+    echo "  play by <artist name> <song name>       # Finds a song by name given an artist and plays it.";
+    echo "  play list <playlist name>               # Finds a playlist by name and plays it.";
+    echo "  play uri <uri>                          # Play songs from specific uri.";
     echo;
-    echo "  next                         # Skips to the next song in a playlist.";
-    echo "  prev                         # Returns to the previous song in a playlist.";
-    echo "  replay                       # Replays the current track from the begining.";
-    echo "  pos <time>                   # Jumps to a time (in secs) in the current song.";
-    echo "  pause                        # Pauses (or resumes) Spotify playback.";
-    echo "  stop                         # Stops playback.";
-    echo "  quit                         # Stops playback and quits Spotify.";
+    echo "  next                                    # Skips to the next song in a playlist.";
+    echo "  prev                                    # Returns to the previous song in a playlist.";
+    echo "  replay                                  # Replays the current track from the begining.";
+    echo "  pos <time>                              # Jumps to a time (in secs) in the current song.";
+    echo "  pause                                   # Pauses (or resumes) Spotify playback.";
+    echo "  stop                                    # Stops playback.";
+    echo "  quit                                    # Stops playback and quits Spotify.";
     echo;
-    echo "  vol up                       # Increases the volume by 10%.";
-    echo "  vol down                     # Decreases the volume by 10%.";
-    echo "  vol <amount>                 # Sets the volume to an amount between 0 and 100.";
-    echo "  vol [show]                   # Shows the current Spotify volume.";
+    echo "  vol up                                  # Increases the volume by 10%.";
+    echo "  vol down                                # Decreases the volume by 10%.";
+    echo "  vol <amount>                            # Sets the volume to an amount between 0 and 100.";
+    echo "  vol [show]                              # Shows the current Spotify volume.";
     echo;
-    echo "  status                       # Shows the current player status.";
+    echo "  status                                  # Shows the current player status.";
     echo;
-    echo "  share                        # Displays the current song's Spotify URL and URI."
-    echo "  share url                    # Displays the current song's Spotify URL and copies it to the clipboard."
-    echo "  share uri                    # Displays the current song's Spotify URI and copies it to the clipboard."
+    echo "  share                                   # Displays the current song's Spotify URL and URI."
+    echo "  share url                               # Displays the current song's Spotify URL and copies it to the clipboard."
+    echo "  share uri                               # Displays the current song's Spotify URI and copies it to the clipboard."
     echo;
-    echo "  toggle shuffle               # Toggles shuffle playback mode.";
-    echo "  toggle repeat                # Toggles repeat playback mode.";
+    echo "  toggle shuffle                          # Toggles shuffle playback mode.";
+    echo "  toggle repeat                           # Toggles repeat playback mode.";
     showAPIHelp
 }
 
@@ -243,6 +244,23 @@ while [ $# -gt 0 ]; do
 
                     "uri"  )
                         SPOTIFY_PLAY_URI=${array[@]:2:$len};;
+
+                    "by" )                  # searches for a specific artists track
+
+                        getAccessToken;
+                        Q=$4
+
+                        SPOTIFY_PLAY_URI=$( \
+                                    curl -s -G $SPOTIFY_SEARCH_API \
+                                        -H "Authorization: Bearer ${SPOTIFY_ACCESS_TOKEN}" \
+                                        -H "Accept: application/json" \
+                                        --data-urlencode "q=$Q" \
+                                        -d "type=track" \
+                                    | grep -iA 100 "$3" \
+                                    | grep -iA 10 "\"name\" : \"$Q\"" \
+                                    | grep -E -o "spotify:track:[a-zA-Z0-9]+" -m 10 \
+                                )
+                                echo "play uri: ${SPOTIFY_PLAY_URI}";;
 
                     *   )
                         _args=${array[@]:1:$len};
