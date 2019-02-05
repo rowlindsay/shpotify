@@ -258,9 +258,8 @@ while [ $# -gt 0 ]; do
                                         -d "type=track" \
                                     | grep -iA 100 "$3" \
                                     | grep -iA 10 "\"name\" : \"$Q\"" \
-                                    | grep -E -o "spotify:track:[a-zA-Z0-9]+" -m 10 \
-                                )
-                                echo "play uri: ${SPOTIFY_PLAY_URI}";;
+                                    | grep -E -o -m 1 "spotify:track:[a-zA-Z0-9]+" \
+                                );;
 
                     *   )
                         _args=${array[@]:1:$len};
@@ -270,6 +269,8 @@ while [ $# -gt 0 ]; do
                 if [ "$SPOTIFY_PLAY_URI" != "" ]; then
                     if [ "$2" = "uri" ]; then
                         cecho "Playing Spotify URI: $SPOTIFY_PLAY_URI";
+                    elif [ "$2" = "by" ]; then
+                        cecho "Playing $4 by $3";
                     else
                         cecho "Playing ($Q Search) -> Spotify URI: $SPOTIFY_PLAY_URI";
                     fi
